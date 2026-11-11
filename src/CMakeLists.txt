@@ -12,6 +12,15 @@ idf_component_register(
         "apps/book_of_answers/book_of_answers_app.cpp"
         "apps/book_of_answers/book_of_answers_pages.cpp"
         "apps/book_of_answers/book_of_answers_state.cpp"
+        "apps/flashcards/flashcards_app.cpp"
+        "apps/flashcards/flashcards_deck_data.cpp"
+        "apps/flashcards/flashcards_pages.cpp"
+        "apps/flashcards/flashcards_srs.cpp"
+        "apps/flashcards/flashcards_storage.cpp"
+        "apps/todo/todo_app.cpp"
+        "apps/todo/todo_list.cpp"
+        "apps/todo/todo_pages.cpp"
+        "apps/todo/todo_storage.cpp"
         "apps/desktop_pet/desktop_pet_app.cpp"
         "apps/desktop_pet/desktop_pet_daily.cpp"
         "apps/desktop_pet/desktop_pet_outing.cpp"
@@ -63,12 +72,16 @@ idf_component_register(
         "ui/battery_status_overlay.cpp"
         "ui/battery_status_overlay_theme.cpp"
         "ui/font.cpp"
+        "ui/text_utf8.cpp"
+        "ui/ui_widgets.cpp"
     INCLUDE_DIRS
         "."
         "app"
         "apps/book_of_answers"
         "apps/desktop_pet"
         "apps/desktop_pet/core"
+        "apps/flashcards"
+        "apps/todo"
         "apps/onboarding"
         "apps/pomodoro"
         "apps/status_board"
@@ -86,6 +99,7 @@ idf_component_register(
         esp_driver_ledc
         esp_driver_spi
         esp_hw_support
+        esp_partition
         button
         gt911
         nvs_flash

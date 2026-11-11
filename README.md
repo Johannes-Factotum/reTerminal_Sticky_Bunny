@@ -66,6 +66,36 @@ See [the compatibility test plan](docs/screen_compatibility.md) for hardware che
 | <img src="docs/images/status-board/menu.png" alt="Sticky Status Board menu" width="390"> | <img src="docs/images/book-of-answers/home.png" alt="Book of Answers home screen" width="245"> |
 | Display `BUSY`, `MEETING`, `ON CALL`, `OPEN TO TALK`, `REST`, or a custom on-device message in landscape. | Hold a question in mind and shake for three seconds to reveal a message, `YES`, `NO`, or `UNCLEAR`. |
 
+## Cards, To-Do and the Pomodoro jingle
+
+The launcher's four cards are now **Pet**, **Pomodoro**, **Cards** and **To-Do**. Status Board and Book of Answers are still one gesture away: rotate the device to landscape (Status Board) or shake it (Book of Answers) while the launcher is open.
+
+| Cards: question | Cards: answer | To-Do list | To-Do editor |
+| --- | --- | --- | --- |
+| <img src="docs/images/flashcards/question.png" alt="Flashcard question side" width="180"> | <img src="docs/images/flashcards/answer.png" alt="Flashcard answer side with grade buttons" width="180"> | <img src="docs/images/todo/list.png" alt="To-do list page" width="180"> | <img src="docs/images/todo/editor.png" alt="To-do editor with keyboard" width="180"> |
+
+### Cards (spaced-repetition flashcards)
+
+- Ships with **Spanish Top 5000**: the 5000 most frequent Spanish words with English glosses (see [the deck notes](assets/flashcards/README.md) for sources and the CC BY-SA license).
+- Anki-style scheduling (SM-2): `AGAIN`, `HARD`, `GOOD`, `EASY`; each button shows the next interval. Failed cards come back a few cards later in the same session.
+- The home page shows cards due, new cards left today, learned and mature (21+ day) counts.
+- `NEW` cycles the daily new-card limit (5, 10, 20, 30, 50); `+10 NEW CARDS` adds extra cards for today; `SHOW` flips the card direction (Spanish→English or English→Spanish).
+- Days come from the PCF8563 RTC. Progress for every card is stored in the unused `assets` flash partition in two alternating CRC-checked slots, saved every 10 answers, when a session ends, and before the launcher or deep sleep takes over.
+- Accented text (á é í ó ú ñ ü ¿ ¡ ...) is drawn by a UTF-8 layer on top of the 5x7 font.
+- Add your own decks (for example an Anki "Notes in Plain Text" export) as `assets/flashcards/decks/*.tsv`, run `python3 tools/generate_flashcards_decks.py` and rebuild. With more than one deck, arrows on the home page switch decks.
+
+### To-Do
+
+- Up to 40 tasks of 63 bytes each, saved in NVS.
+- Tap a task to tick it off (with a short chime), tap `...` to edit or delete it, `CLEAR DONE` removes finished tasks, `+ ADD` opens the editor.
+- On-screen keyboard with one-shot `SHIFT`, a `123` page with digits, punctuation and Spanish accents (`á é í ó ú ñ ü ¿ ¡`).
+
+### Pomodoro jingle
+
+- Time-up alarm is a short melody (rising C-major arpeggio and cadence) that repeats until `END` is tapped; starting a focus session plays a two-note cue.
+
+> Note: `pio run -t uploadfs` would overwrite the `assets` partition and erase flashcard progress.
+
 ## The virtual pet
 
 The pet is the home screen and the emotional center of the firmware. Its state is advanced by real RTC time and stored in two checksummed NVS slots so a damaged save can fall back to the previous valid record.
@@ -100,7 +130,7 @@ Care is deliberately paced. Each day can award up to 10 growth and 8 love; miles
 </p>
 
 - Tap the **AI key** or swipe up from the lower screen to open the launcher.
-- Tap an app card to launch it.
+- Tap an app card to launch it (Pet, Pomodoro, Cards, To-Do).
 - Swipe down from the upper half to close the launcher.
 - Double-tap the AI key from any page to return to the pet.
 - Rotate from landscape to portrait while the launcher is open to enter Pomodoro.

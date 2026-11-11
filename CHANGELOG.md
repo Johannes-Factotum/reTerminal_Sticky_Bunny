@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Add the Cards app: SM-2 spaced-repetition flashcards with a built-in Spanish Top 5000 deck, daily new-card limits, card direction toggle and power-loss-safe progress in the `assets` partition.
+- Add the To-Do app: up to 40 tasks with an on-screen keyboard (including Spanish accents), saved in NVS.
+- Replace the Pomodoro alarm with a repeating melodic jingle and add a focus-start cue.
+- Launcher cards are now Pet, Pomodoro, Cards and To-Do; Status Board and Book of Answers remain reachable by rotation and shake.
+- Add a UTF-8 text renderer with Latin-1 diacritics on top of the 5x7 font, plus host tests for the new apps.
+
 - Align the ESP-IDF application descriptor with runtime version 0.1.3 and check both version declarations in host tests. The version-aligned rebuild requires its own physical-device acceptance.
 
 - Keep repeated SSD1677 partial refreshes synchronized with standby/resume power state, including tutorial page navigation.

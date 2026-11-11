@@ -123,10 +123,10 @@ std::array<LauncherCard, kCardCount> launcher_cards(int width, int height)
                   left + kCardWidth + kColumnGap,
                   kTopRowY, kCardWidth, kCardHeight,
                   kTopRowY + 10, kTopRowY + 200},
-                 {StickyAppId::StatusBoard,
+                 {StickyAppId::Flashcards,
                   left, kBottomRowY, kCardWidth, kCardHeight,
                   kBottomRowY + 10, kBottomRowY + 200},
-                 {StickyAppId::BookOfAnswers,
+                 {StickyAppId::Todo,
                   left + kCardWidth + kColumnGap,
                   kBottomRowY, kCardWidth, kCardHeight,
                   kBottomRowY + 10, kBottomRowY + 200}}};
@@ -144,11 +144,11 @@ std::array<LauncherCard, kCardCount> launcher_cards(int width, int height)
               left + (kCardWidth + kGap), kTop,
               kCardWidth, kCardHeight,
               kTop + 22, kTop + 212},
-             {StickyAppId::StatusBoard,
+             {StickyAppId::Flashcards,
               left + (kCardWidth + kGap) * 2, kTop,
               kCardWidth, kCardHeight,
               kTop + 22, kTop + 212},
-             {StickyAppId::BookOfAnswers,
+             {StickyAppId::Todo,
               left + (kCardWidth + kGap) * 3, kTop,
               kCardWidth, kCardHeight,
               kTop + 22, kTop + 212}}};
@@ -165,6 +165,10 @@ LauncherLabel app_label(StickyAppId app)
         return {"Status", "Board"};
     case StickyAppId::BookOfAnswers:
         return {"Answers of", "book"};
+    case StickyAppId::Flashcards:
+        return {"Cards", nullptr};
+    case StickyAppId::Todo:
+        return {"To-Do", nullptr};
     }
     return {"App", nullptr};
 }
@@ -180,6 +184,10 @@ AppLauncherAssetId launcher_asset_id(StickyAppId app)
         return AppLauncherAssetId::Status;
     case StickyAppId::BookOfAnswers:
         return AppLauncherAssetId::Answers;
+    case StickyAppId::Flashcards:
+        return AppLauncherAssetId::Cards;
+    case StickyAppId::Todo:
+        return AppLauncherAssetId::Todo;
     }
     return AppLauncherAssetId::Pet;
 }

@@ -214,6 +214,31 @@ compile_and_run sticky_app_power_policy_test \
     test/sticky_app_power_policy_test.cpp \
     src/app/sticky_app_power_policy.cpp
 
+compile_and_run text_utf8_test \
+    -Isrc/ui \
+    test/text_utf8_test.cpp \
+    src/ui/text_utf8.cpp src/ui/canvas.cpp src/ui/font.cpp
+
+compile_and_run flashcards_srs_test \
+    -Isrc/apps/flashcards \
+    test/flashcards_srs_test.cpp \
+    src/apps/flashcards/flashcards_srs.cpp \
+    src/apps/flashcards/flashcards_deck_data.cpp
+
+compile_and_run todo_list_test \
+    -Isrc/apps/todo \
+    test/todo_list_test.cpp \
+    src/apps/todo/todo_list.cpp
+
+compile_and_run new_apps_pages_test \
+    -Isrc/apps/flashcards -Isrc/apps/todo -Isrc/ui \
+    test/new_apps_pages_test.cpp \
+    src/apps/flashcards/flashcards_pages.cpp \
+    src/apps/todo/todo_pages.cpp \
+    src/apps/todo/todo_list.cpp \
+    src/ui/ui_widgets.cpp src/ui/text_utf8.cpp \
+    src/ui/canvas.cpp src/ui/font.cpp
+
 compile_and_run sticky_app_router_test \
     -Isrc/app -Isrc/sensors \
     test/sticky_app_router_test.cpp \
@@ -237,7 +262,7 @@ compile_and_run sticky_display_spi_config_test \
     -Itest/epaper_stubs -Isrc/board \
     test/sticky_display_spi_config_test.cpp
 
-echo "[host-test] PASS ${passed_count}/32"
+echo "[host-test] PASS ${passed_count}/36"
 
 # Compile the real panel drivers with simulated GPIO/SPI and controller responses.
 # 使用模拟 GPIO/SPI 编译并验证真实屏幕驱动。

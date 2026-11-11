@@ -35,10 +35,34 @@ struct BuzzerSequence {
     const char *name;
 };
 
+// Pomodoro "time is up" jingle: a bright rising arpeggio answered by a
+// short cadence, repeated after a pause until the user taps END.
 constexpr BuzzerNote kAlarmNotes[] = {
-    {1047U, 140U, 60U, kAlarmDuty},
-    {1319U, 140U, 60U, kAlarmDuty},
-    {1568U, 220U, 1200U, kAlarmDuty},
+    {1047U, 110U, 30U, kAlarmDuty},   // C6
+    {1319U, 110U, 30U, kAlarmDuty},   // E6
+    {1568U, 110U, 30U, kAlarmDuty},   // G6
+    {2093U, 260U, 90U, kAlarmDuty},   // C7
+    {1760U, 110U, 30U, kAlarmDuty},   // A6
+    {1568U, 110U, 30U, kAlarmDuty},   // G6
+    {1760U, 110U, 30U, kAlarmDuty},   // A6
+    {2093U, 420U, 1400U, kAlarmDuty}, // C7, then rest
+};
+
+constexpr BuzzerNote kFocusStartNotes[] = {
+    {1319U, 70U, 40U, 110U},
+    {1760U, 120U, 0U, 120U},
+};
+
+constexpr BuzzerNote kTaskDoneNotes[] = {
+    {1568U, 45U, 25U, 100U},
+    {2093U, 90U, 0U, 110U},
+};
+
+constexpr BuzzerNote kSessionCompleteNotes[] = {
+    {1047U, 90U, 30U, 120U},
+    {1319U, 90U, 30U, 120U},
+    {1568U, 90U, 30U, 120U},
+    {2093U, 220U, 0U, 130U},
 };
 
 constexpr BuzzerNote kHatchNotes[] = {
@@ -199,6 +223,12 @@ BuzzerSequence sequence_for_pattern(StickyBuzzerPattern pattern)
         return sequence(kWakeNotes, "wake");
     case StickyBuzzerPattern::PowerSleep:
         return sequence(kPowerSleepNotes, "power_sleep");
+    case StickyBuzzerPattern::FocusStart:
+        return sequence(kFocusStartNotes, "focus_start");
+    case StickyBuzzerPattern::TaskDone:
+        return sequence(kTaskDoneNotes, "task_done");
+    case StickyBuzzerPattern::SessionComplete:
+        return sequence(kSessionCompleteNotes, "session_complete");
     case StickyBuzzerPattern::None:
     default:
         return {nullptr, 0U, "none"};
@@ -392,7 +422,7 @@ esp_err_t sticky_buzzer_start_alarm()
         StickyBuzzerPattern::Alarm) {
         s_variant.store(0U);
         xTaskNotifyGive(s_buzzer_task);
-        STICKY_LOGI(kTag, "buzzer=alarm state=started pattern=three_note");
+        STICKY_LOGI(kTag, "buzzer=alarm state=started pattern=jingle");
     }
     return ESP_OK;
 }

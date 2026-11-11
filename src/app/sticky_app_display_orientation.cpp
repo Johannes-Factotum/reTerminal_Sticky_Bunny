@@ -27,6 +27,8 @@ bool sticky_app_display_rotation(StickyAppId app,
         return false;
     case StickyAppId::DesktopPet:
     case StickyAppId::BookOfAnswers:
+    case StickyAppId::Flashcards:
+    case StickyAppId::Todo:
         return false;
     }
     return false;

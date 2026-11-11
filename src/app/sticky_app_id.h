@@ -5,6 +5,8 @@ enum class StickyAppId {
     Pomodoro,
     StatusBoard,
     BookOfAnswers,
+    Flashcards,
+    Todo,
 };
 
 // Returns the stable English identifier used by launcher logs.

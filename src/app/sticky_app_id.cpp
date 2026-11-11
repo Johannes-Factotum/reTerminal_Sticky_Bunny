@@ -11,6 +11,10 @@ const char *sticky_app_id_name(StickyAppId app)
         return "status_board";
     case StickyAppId::BookOfAnswers:
         return "book_of_answers";
+    case StickyAppId::Flashcards:
+        return "flashcards";
+    case StickyAppId::Todo:
+        return "todo";
     }
     return "unknown";
 }

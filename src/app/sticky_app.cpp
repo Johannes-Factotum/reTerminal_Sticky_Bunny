@@ -10,6 +10,7 @@
 #include "canvas.h"
 #include "desktop_pet_app.h"
 #include "esp_timer.h"
+#include "flashcards_app.h"
 #include "esp_attr.h"
 #include "esp_sleep.h"
 #include "esp_system.h"
@@ -28,6 +29,7 @@
 #include "sticky_display.h"
 #include "sticky_imu.h"
 #include "sticky_touch.h"
+#include "todo_app.h"
 
 #ifndef STICKY_ONBOARDING_TEST_MODE
 #define STICKY_ONBOARDING_TEST_MODE 0
@@ -61,6 +63,8 @@ bool s_pet_started = false;
 bool s_status_started = false;
 bool s_pomodoro_started = false;
 bool s_book_started = false;
+bool s_flashcards_started = false;
+bool s_todo_started = false;
 bool s_background_timer_wake = false;
 int64_t s_background_sleep_deadline_us = 0;
 uint32_t s_last_user_activity_ms = 0U;
@@ -92,6 +96,10 @@ bool app_started(StickyAppId app)
         return s_status_started;
     case StickyAppId::BookOfAnswers:
         return s_book_started;
+    case StickyAppId::Flashcards:
+        return s_flashcards_started;
+    case StickyAppId::Todo:
+        return s_todo_started;
     }
     return false;
 }
@@ -111,6 +119,12 @@ void mark_app_started(StickyAppId app)
     case StickyAppId::BookOfAnswers:
         s_book_started = true;
         break;
+    case StickyAppId::Flashcards:
+        s_flashcards_started = true;
+        break;
+    case StickyAppId::Todo:
+        s_todo_started = true;
+        break;
     }
 }
 
@@ -125,6 +139,10 @@ esp_err_t pause_app(StickyAppId app)
         return status_board_app_pause();
     case StickyAppId::BookOfAnswers:
         return book_of_answers_app_pause();
+    case StickyAppId::Flashcards:
+        return flashcards_app_pause();
+    case StickyAppId::Todo:
+        return todo_app_pause();
     }
     return ESP_ERR_INVALID_ARG;
 }
@@ -140,6 +158,10 @@ esp_err_t start_app(StickyAppId app)
         return status_board_app_start(*s_canvas);
     case StickyAppId::BookOfAnswers:
         return book_of_answers_app_start(*s_canvas);
+    case StickyAppId::Flashcards:
+        return flashcards_app_start(*s_canvas);
+    case StickyAppId::Todo:
+        return todo_app_start(*s_canvas);
     }
     return ESP_ERR_INVALID_ARG;
 }
@@ -155,6 +177,10 @@ esp_err_t resume_app(StickyAppId app)
         return status_board_app_resume();
     case StickyAppId::BookOfAnswers:
         return book_of_answers_app_resume();
+    case StickyAppId::Flashcards:
+        return flashcards_app_resume();
+    case StickyAppId::Todo:
+        return todo_app_resume();
     }
     return ESP_ERR_INVALID_ARG;
 }
@@ -190,6 +216,12 @@ bool power_sleep_allowed()
     if (s_current_app == StickyAppId::BookOfAnswers) {
         return book_of_answers_app_power_sleep_allowed();
     }
+    if (s_current_app == StickyAppId::Flashcards) {
+        return flashcards_app_power_sleep_allowed();
+    }
+    if (s_current_app == StickyAppId::Todo) {
+        return todo_app_power_sleep_allowed();
+    }
     return true;
 }
 
@@ -206,6 +238,12 @@ uint32_t power_sleep_timeout_ms()
     }
     if (s_current_app == StickyAppId::BookOfAnswers) {
         return book_of_answers_app_power_sleep_timeout_ms();
+    }
+    if (s_current_app == StickyAppId::Flashcards) {
+        return flashcards_app_power_sleep_timeout_ms();
+    }
+    if (s_current_app == StickyAppId::Todo) {
+        return todo_app_power_sleep_timeout_ms();
     }
     return 0U;
 }
@@ -227,6 +265,12 @@ esp_err_t prepare_app_power_sleep(uint32_t &current_epoch,
     }
     if (s_current_app == StickyAppId::BookOfAnswers) {
         return book_of_answers_app_prepare_power_sleep();
+    }
+    if (s_current_app == StickyAppId::Flashcards) {
+        return flashcards_app_prepare_power_sleep();
+    }
+    if (s_current_app == StickyAppId::Todo) {
+        return todo_app_prepare_power_sleep();
     }
     return ESP_ERR_INVALID_ARG;
 }
@@ -796,7 +840,7 @@ void app_task(void *)
     LauncherImuPrestart imu_prestart = {};
     StickyImuOrientation last_settled = StickyImuOrientation::Unknown;
     STICKY_LOGI(kTag,
-                "launcher=ready trigger=top_button,bottom_swipe selection=touch,rotation,shake apps=4 imu=on_demand shake_select_ms=%u current_app=%s result=ok",
+                "launcher=ready trigger=top_button,bottom_swipe selection=touch,rotation,shake apps=6 imu=on_demand shake_select_ms=%u current_app=%s result=ok",
                 static_cast<unsigned>(kStickyLauncherShakeSelectMs),
                 sticky_app_id_name(s_current_app));
 

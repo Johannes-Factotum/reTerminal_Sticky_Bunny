@@ -221,6 +221,7 @@ void start_timer()
     STICKY_LOGI(kTag,
                 "pomodoro=timer state=started duration_s=%lu",
                 static_cast<unsigned long>(s_total_seconds));
+    sticky_buzzer_play_pattern(StickyBuzzerPattern::FocusStart);
     change_page(PomodoroPage::Running, "start_focus");
 }
 

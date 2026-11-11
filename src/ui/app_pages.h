@@ -4,7 +4,9 @@
 
 class Canvas;
 
-// Draws the four touch-selectable application cards in the current rotation.
+// Draws the four touch-selectable application cards (Pet, Pomodoro, Cards,
+// To-Do) in the current rotation. Status Board and Book of Answers stay
+// reachable by rotating or shaking the device while the launcher is open.
 // 在当前屏幕方向绘制四张可触摸选择的应用卡片。
 void app_page_render_launcher(Canvas &canvas, StickyAppId current_app);
 

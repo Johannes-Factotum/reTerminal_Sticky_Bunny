@@ -9,7 +9,7 @@
 // 初始化板载蜂鸣器，并保持静音状态。
 esp_err_t sticky_buzzer_init();
 
-// Starts a repeating three-note alarm that remains active until stop is called.
+// Starts the repeating Pomodoro jingle; it plays until stop is called.
 // 启动循环三音提醒，直到调用停止函数才结束。
 esp_err_t sticky_buzzer_start_alarm();
 

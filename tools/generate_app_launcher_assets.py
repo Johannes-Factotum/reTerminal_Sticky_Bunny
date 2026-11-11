@@ -26,6 +26,8 @@ ASSETS = (
     AssetSpec("focus.png", "Focus", "kFocus"),
     AssetSpec("status.png", "Status", "kStatus"),
     AssetSpec("answers.png", "Answers", "kAnswers"),
+    AssetSpec("cards.png", "Cards", "kCards"),
+    AssetSpec("todo.png", "Todo", "kTodo"),
 )
 
 WIDTH = 176

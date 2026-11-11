@@ -9,6 +9,8 @@ enum class AppLauncherAssetId : uint8_t {
     Focus,
     Status,
     Answers,
+    Cards,
+    Todo,
 };
 
 struct AppLauncherStickerAsset {

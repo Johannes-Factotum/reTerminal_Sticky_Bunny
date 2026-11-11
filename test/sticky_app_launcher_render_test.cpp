@@ -154,6 +154,10 @@ AppLauncherAssetId launcher_asset_id(StickyAppId app)
         return AppLauncherAssetId::Status;
     case StickyAppId::BookOfAnswers:
         return AppLauncherAssetId::Answers;
+    case StickyAppId::Flashcards:
+        return AppLauncherAssetId::Cards;
+    case StickyAppId::Todo:
+        return AppLauncherAssetId::Todo;
     }
     return AppLauncherAssetId::Pet;
 }
@@ -186,8 +190,8 @@ void assert_selection_follows_current_app(
     constexpr std::array<StickyAppId, 4> kApps = {
         StickyAppId::DesktopPet,
         StickyAppId::Pomodoro,
-        StickyAppId::StatusBoard,
-        StickyAppId::BookOfAnswers,
+        StickyAppId::Flashcards,
+        StickyAppId::Todo,
     };
 
     for (size_t selected_index = 0; selected_index < kApps.size();
@@ -236,10 +240,10 @@ int main()
     assert(selected_app == StickyAppId::Pomodoro);
     assert(app_page_launcher_app_at(
         canvas.width(), canvas.height(), 132, 581, selected_app));
-    assert(selected_app == StickyAppId::StatusBoard);
+    assert(selected_app == StickyAppId::Flashcards);
     assert(app_page_launcher_app_at(
         canvas.width(), canvas.height(), 348, 581, selected_app));
-    assert(selected_app == StickyAppId::BookOfAnswers);
+    assert(selected_app == StickyAppId::Todo);
     assert(!app_page_launcher_app_at(
         canvas.width(), canvas.height(), 240, 400, selected_app));
     assert(!app_page_launcher_app_at(
@@ -274,10 +278,10 @@ int main()
     assert(selected_app == StickyAppId::Pomodoro);
     assert(app_page_launcher_app_at(
         canvas.width(), canvas.height(), 497, 286, selected_app));
-    assert(selected_app == StickyAppId::StatusBoard);
+    assert(selected_app == StickyAppId::Flashcards);
     assert(app_page_launcher_app_at(
         canvas.width(), canvas.height(), 691, 286, selected_app));
-    assert(selected_app == StickyAppId::BookOfAnswers);
+    assert(selected_app == StickyAppId::Todo);
     assert(!app_page_launcher_app_at(
         canvas.width(), canvas.height(), 206, 286, selected_app));
     assert_label_text_centered(
