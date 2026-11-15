@@ -29,6 +29,8 @@ bool sticky_app_display_rotation(StickyAppId app,
     case StickyAppId::BookOfAnswers:
     case StickyAppId::Flashcards:
     case StickyAppId::Todo:
+    case StickyAppId::Habits:
+    case StickyAppId::Draftling:
         return false;
     }
     return false;

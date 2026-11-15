@@ -100,6 +100,9 @@ bool app_started(StickyAppId app)
         return s_flashcards_started;
     case StickyAppId::Todo:
         return s_todo_started;
+    case StickyAppId::Habits:
+    case StickyAppId::Draftling:
+        return false;  // not implemented yet
     }
     return false;
 }
@@ -125,6 +128,9 @@ void mark_app_started(StickyAppId app)
     case StickyAppId::Todo:
         s_todo_started = true;
         break;
+    case StickyAppId::Habits:
+    case StickyAppId::Draftling:
+        break;
     }
 }
 
@@ -143,6 +149,9 @@ esp_err_t pause_app(StickyAppId app)
         return flashcards_app_pause();
     case StickyAppId::Todo:
         return todo_app_pause();
+    case StickyAppId::Habits:
+    case StickyAppId::Draftling:
+        return ESP_ERR_NOT_SUPPORTED;  // not implemented yet
     }
     return ESP_ERR_INVALID_ARG;
 }
@@ -162,6 +171,9 @@ esp_err_t start_app(StickyAppId app)
         return flashcards_app_start(*s_canvas);
     case StickyAppId::Todo:
         return todo_app_start(*s_canvas);
+    case StickyAppId::Habits:
+    case StickyAppId::Draftling:
+        return ESP_ERR_NOT_SUPPORTED;  // not implemented yet
     }
     return ESP_ERR_INVALID_ARG;
 }
@@ -181,6 +193,9 @@ esp_err_t resume_app(StickyAppId app)
         return flashcards_app_resume();
     case StickyAppId::Todo:
         return todo_app_resume();
+    case StickyAppId::Habits:
+    case StickyAppId::Draftling:
+        return ESP_ERR_NOT_SUPPORTED;  // not implemented yet
     }
     return ESP_ERR_INVALID_ARG;
 }

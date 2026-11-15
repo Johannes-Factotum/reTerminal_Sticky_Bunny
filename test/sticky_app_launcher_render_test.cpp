@@ -158,6 +158,10 @@ AppLauncherAssetId launcher_asset_id(StickyAppId app)
         return AppLauncherAssetId::Cards;
     case StickyAppId::Todo:
         return AppLauncherAssetId::Todo;
+    case StickyAppId::Habits:
+        return AppLauncherAssetId::Habits;
+    case StickyAppId::Draftling:
+        return AppLauncherAssetId::Draftling;
     }
     return AppLauncherAssetId::Pet;
 }
@@ -185,13 +189,12 @@ void assert_selection_follows_current_app(
     Canvas &canvas,
     const std::vector<uint8_t> &buffer,
     CanvasRotation rotation,
-    const std::array<std::pair<int, int>, 4> &asset_origins)
+    const std::array<std::pair<int, int>, 6> &asset_origins)
 {
-    constexpr std::array<StickyAppId, 4> kApps = {
-        StickyAppId::DesktopPet,
-        StickyAppId::Pomodoro,
-        StickyAppId::Flashcards,
-        StickyAppId::Todo,
+    constexpr std::array<StickyAppId, 6> kApps = {
+        StickyAppId::DesktopPet, StickyAppId::Pomodoro,
+        StickyAppId::Flashcards, StickyAppId::Todo,
+        StickyAppId::Habits,     StickyAppId::Draftling,
     };
 
     for (size_t selected_index = 0; selected_index < kApps.size();
@@ -226,34 +229,35 @@ int main()
     assert(!app_page_launcher_tutorial_at(480, 800, 240, 112));
 #endif
     StickyAppId selected_app = StickyAppId::DesktopPet;
+    constexpr std::array<StickyAppId, 6> kOrder = {
+        StickyAppId::DesktopPet, StickyAppId::Pomodoro,
+        StickyAppId::Flashcards, StickyAppId::Todo,
+        StickyAppId::Habits,     StickyAppId::Draftling,
+    };
 
+    // Portrait: two columns, three rows.
     canvas.set_rotation(CanvasRotation::Deg90CounterClockwise);
     app_page_render_launcher(canvas, StickyAppId::DesktopPet);
     assert(canvas.rotation() == CanvasRotation::Deg90CounterClockwise);
     assert(count_level(buffer, GrayLevel::Black) > 7000U);
     assert(count_level(buffer, GrayLevel::LightGray) > 2000U);
-    assert(app_page_launcher_app_at(
-        canvas.width(), canvas.height(), 132, 331, selected_app));
-    assert(selected_app == StickyAppId::DesktopPet);
-    assert(app_page_launcher_app_at(
-        canvas.width(), canvas.height(), 348, 331, selected_app));
-    assert(selected_app == StickyAppId::Pomodoro);
-    assert(app_page_launcher_app_at(
-        canvas.width(), canvas.height(), 132, 581, selected_app));
-    assert(selected_app == StickyAppId::Flashcards);
-    assert(app_page_launcher_app_at(
-        canvas.width(), canvas.height(), 348, 581, selected_app));
-    assert(selected_app == StickyAppId::Todo);
+    for (size_t i = 0; i < kOrder.size(); ++i) {
+        const int x = i % 2U == 0U ? 126 : 354;
+        const int y = 200 + static_cast<int>(i / 2U) * 222;
+        assert(app_page_launcher_app_at(canvas.width(), canvas.height(), x,
+                                        y, selected_app));
+        assert(selected_app == kOrder[i]);
+    }
     assert(!app_page_launcher_app_at(
         canvas.width(), canvas.height(), 240, 400, selected_app));
     assert(!app_page_launcher_app_at(
-        canvas.width(), canvas.height(), 132, 451, selected_app));
+        canvas.width(), canvas.height(), 126, 330, selected_app));
     assert_label_text_centered(
         buffer, CanvasRotation::Deg90CounterClockwise,
-        31, 394, 190, 54, GrayLevel::White);
+        31, 262, 190, 46, GrayLevel::White);
     assert_label_text_centered(
         buffer, CanvasRotation::Deg90CounterClockwise,
-        259, 394, 190, 54, GrayLevel::Black);
+        259, 262, 190, 46, GrayLevel::Black);
     assert_content_vertically_centered(
         buffer, CanvasRotation::Deg90CounterClockwise,
         canvas.width(), canvas.height());
@@ -261,35 +265,32 @@ int main()
         canvas,
         buffer,
         CanvasRotation::Deg90CounterClockwise,
-        {{{38, 204}, {266, 204}, {38, 464}, {266, 464}}});
+        {{{62, 124}, {290, 124}, {62, 346}, {290, 346}, {62, 568},
+          {290, 568}}});
     app_page_render_launcher(canvas, StickyAppId::DesktopPet);
     write_preview(buffer, "/tmp/sticky_launcher_portrait.ppm");
 
+    // Landscape: three columns, two rows.
     canvas.set_rotation(CanvasRotation::Deg0);
     app_page_render_launcher(canvas, StickyAppId::DesktopPet);
     assert(canvas.rotation() == CanvasRotation::Deg0);
     assert(count_level(buffer, GrayLevel::Black) > 7000U);
     assert(count_level(buffer, GrayLevel::LightGray) > 2000U);
-    assert(app_page_launcher_app_at(
-        canvas.width(), canvas.height(), 109, 286, selected_app));
-    assert(selected_app == StickyAppId::DesktopPet);
-    assert(app_page_launcher_app_at(
-        canvas.width(), canvas.height(), 303, 286, selected_app));
-    assert(selected_app == StickyAppId::Pomodoro);
-    assert(app_page_launcher_app_at(
-        canvas.width(), canvas.height(), 497, 286, selected_app));
-    assert(selected_app == StickyAppId::Flashcards);
-    assert(app_page_launcher_app_at(
-        canvas.width(), canvas.height(), 691, 286, selected_app));
-    assert(selected_app == StickyAppId::Todo);
+    for (size_t i = 0; i < kOrder.size(); ++i) {
+        const int x = 148 + static_cast<int>(i % 3U) * 252;
+        const int y = 170 + static_cast<int>(i / 3U) * 198;
+        assert(app_page_launcher_app_at(canvas.width(), canvas.height(), x,
+                                        y, selected_app));
+        assert(selected_app == kOrder[i]);
+    }
     assert(!app_page_launcher_app_at(
-        canvas.width(), canvas.height(), 206, 286, selected_app));
+        canvas.width(), canvas.height(), 274, 170, selected_app));
     assert_label_text_centered(
         buffer, CanvasRotation::Deg0,
-        18, 366, 176, 54, GrayLevel::White);
+        48, 218, 200, 42, GrayLevel::White);
     assert_label_text_centered(
         buffer, CanvasRotation::Deg0,
-        214, 366, 176, 54, GrayLevel::Black);
+        300, 218, 200, 42, GrayLevel::Black);
     assert_content_vertically_centered(
         buffer, CanvasRotation::Deg0,
         canvas.width(), canvas.height());
@@ -297,7 +298,8 @@ int main()
         canvas,
         buffer,
         CanvasRotation::Deg0,
-        {{{18, 176}, {214, 176}, {410, 176}, {606, 176}}});
+        {{{84, 84}, {336, 84}, {588, 84}, {84, 282}, {336, 282},
+          {588, 282}}});
     app_page_render_launcher(canvas, StickyAppId::DesktopPet);
     write_preview(buffer, "/tmp/sticky_launcher_landscape.ppm");
     return 0;

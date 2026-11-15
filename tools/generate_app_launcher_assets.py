@@ -28,13 +28,16 @@ ASSETS = (
     AssetSpec("answers.png", "Answers", "kAnswers"),
     AssetSpec("cards.png", "Cards", "kCards"),
     AssetSpec("todo.png", "Todo", "kTodo"),
+    AssetSpec("habits.png", "Habits", "kHabits"),
+    AssetSpec("draftling.png", "Draftling", "kDraftling"),
 )
 
-WIDTH = 176
-HEIGHT = 176
-BLACK_MAX = 84
+# Six cards share the launcher, so the 176 px source art is scaled down.
+WIDTH = 128
+HEIGHT = 128
+BLACK_MAX = 110
 GRAY_MAX = 220
-SELECTION_OUTLINE_RADIUS = 3
+SELECTION_OUTLINE_RADIUS = 2
 
 
 def read_grayscale(path: Path) -> bytes:
@@ -49,7 +52,7 @@ def read_grayscale(path: Path) -> bytes:
             "-i",
             str(path),
             "-vf",
-            f"scale={WIDTH}:{HEIGHT}:flags=neighbor,format=gray",
+            f"scale={WIDTH}:{HEIGHT}:flags=lanczos,format=gray",
             "-frames:v",
             "1",
             "-f",

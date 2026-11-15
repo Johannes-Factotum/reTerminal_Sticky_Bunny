@@ -7,6 +7,8 @@ enum class StickyAppId {
     BookOfAnswers,
     Flashcards,
     Todo,
+    Habits,
+    Draftling,
 };
 
 // Returns the stable English identifier used by launcher logs.

@@ -36,9 +36,9 @@ struct TextInkBounds {
     int height;
 };
 
-constexpr size_t kCardCount = 4U;
-constexpr int kPortraitContentOffsetY = 40;
-constexpr int kLandscapeContentOffsetY = 30;
+constexpr size_t kCardCount = 6U;
+constexpr int kPortraitContentOffsetY = 0;
+constexpr int kLandscapeContentOffsetY = 0;
 
 int text_width(const char *text, int scale)
 {
@@ -108,50 +108,46 @@ std::array<LauncherCard, kCardCount> launcher_cards(int width, int height)
 {
     // Keeps visible placement and invisible touch targets in one geometry table.
     // 使用同一份几何表管理画面位置与透明触摸区域。
+    constexpr StickyAppId kOrder[kCardCount] = {
+        StickyAppId::DesktopPet, StickyAppId::Pomodoro,
+        StickyAppId::Flashcards, StickyAppId::Todo,
+        StickyAppId::Habits,     StickyAppId::Draftling,
+    };
+    std::array<LauncherCard, kCardCount> cards = {};
     const bool portrait = height > width;
     if (portrait) {
+        // Two columns, three rows.
         constexpr int kCardWidth = 212;
-        constexpr int kCardHeight = 254;
+        constexpr int kCardHeight = 196;
         constexpr int kColumnGap = 16;
+        constexpr int kTop = 120;
+        constexpr int kRowPitch = 222;
         const int left = (width - kCardWidth * 2 - kColumnGap) / 2;
-        constexpr int kTopRowY = 154 + kPortraitContentOffsetY;
-        constexpr int kBottomRowY = 414 + kPortraitContentOffsetY;
-        return {{{StickyAppId::DesktopPet,
-                  left, kTopRowY, kCardWidth, kCardHeight,
-                  kTopRowY + 10, kTopRowY + 200},
-                 {StickyAppId::Pomodoro,
-                  left + kCardWidth + kColumnGap,
-                  kTopRowY, kCardWidth, kCardHeight,
-                  kTopRowY + 10, kTopRowY + 200},
-                 {StickyAppId::Flashcards,
-                  left, kBottomRowY, kCardWidth, kCardHeight,
-                  kBottomRowY + 10, kBottomRowY + 200},
-                 {StickyAppId::Todo,
-                  left + kCardWidth + kColumnGap,
-                  kBottomRowY, kCardWidth, kCardHeight,
-                  kBottomRowY + 10, kBottomRowY + 200}}};
+        for (size_t i = 0U; i < kCardCount; ++i) {
+            const int column = static_cast<int>(i % 2U);
+            const int row = static_cast<int>(i / 2U);
+            const int y = kTop + row * kRowPitch;
+            cards[i] = {kOrder[i], left + column * (kCardWidth + kColumnGap),
+                        y, kCardWidth, kCardHeight, y + 4, y + 142};
+        }
+        return cards;
     }
 
-    constexpr int kCardWidth = 184;
-    constexpr int kCardHeight = 300;
+    // Landscape: three columns, two rows.
+    constexpr int kCardWidth = 240;
+    constexpr int kCardHeight = 180;
     constexpr int kGap = 12;
-    const int left = (width - kCardWidth * 4 - kGap * 3) / 2;
-    constexpr int kTop = 124 + kLandscapeContentOffsetY;
-    return {{{StickyAppId::DesktopPet,
-              left, kTop, kCardWidth, kCardHeight,
-              kTop + 22, kTop + 212},
-             {StickyAppId::Pomodoro,
-              left + (kCardWidth + kGap), kTop,
-              kCardWidth, kCardHeight,
-              kTop + 22, kTop + 212},
-             {StickyAppId::Flashcards,
-              left + (kCardWidth + kGap) * 2, kTop,
-              kCardWidth, kCardHeight,
-              kTop + 22, kTop + 212},
-             {StickyAppId::Todo,
-              left + (kCardWidth + kGap) * 3, kTop,
-              kCardWidth, kCardHeight,
-              kTop + 22, kTop + 212}}};
+    constexpr int kTop = 82;
+    constexpr int kRowPitch = 198;
+    const int left = (width - kCardWidth * 3 - kGap * 2) / 2;
+    for (size_t i = 0U; i < kCardCount; ++i) {
+        const int column = static_cast<int>(i % 3U);
+        const int row = static_cast<int>(i / 3U);
+        const int y = kTop + row * kRowPitch;
+        cards[i] = {kOrder[i], left + column * (kCardWidth + kGap), y,
+                    kCardWidth, kCardHeight, y + 2, y + 136};
+    }
+    return cards;
 }
 
 LauncherLabel app_label(StickyAppId app)
@@ -160,7 +156,7 @@ LauncherLabel app_label(StickyAppId app)
     case StickyAppId::DesktopPet:
         return {"Pet", nullptr};
     case StickyAppId::Pomodoro:
-        return {"Pomodoro", "Time"};
+        return {"Pomodoro", nullptr};
     case StickyAppId::StatusBoard:
         return {"Status", "Board"};
     case StickyAppId::BookOfAnswers:
@@ -169,6 +165,10 @@ LauncherLabel app_label(StickyAppId app)
         return {"Cards", nullptr};
     case StickyAppId::Todo:
         return {"To-Do", nullptr};
+    case StickyAppId::Habits:
+        return {"Habits", nullptr};
+    case StickyAppId::Draftling:
+        return {"Draftling", nullptr};
     }
     return {"App", nullptr};
 }
@@ -188,6 +188,10 @@ AppLauncherAssetId launcher_asset_id(StickyAppId app)
         return AppLauncherAssetId::Cards;
     case StickyAppId::Todo:
         return AppLauncherAssetId::Todo;
+    case StickyAppId::Habits:
+        return AppLauncherAssetId::Habits;
+    case StickyAppId::Draftling:
+        return AppLauncherAssetId::Draftling;
     }
     return AppLauncherAssetId::Pet;
 }
@@ -319,8 +323,8 @@ void draw_card(Canvas &canvas,
     const bool active = card.app == current_app;
     const int center_x = card.x + card.width / 2;
     const bool portrait = canvas.height() > canvas.width();
-    const int label_width = portrait ? 190 : 176;
-    constexpr int kLabelHeight = 54;
+    const int label_width = portrait ? 190 : 200;
+    const int kLabelHeight = portrait ? 46 : 42;
     const int label_x = center_x - label_width / 2;
 
     draw_sticker(canvas, card.app, center_x, card.asset_y, active);
@@ -352,12 +356,12 @@ void app_page_render_launcher(Canvas &canvas, StickyAppId current_app)
 {
     canvas.clear(GrayLevel::White);
     const bool portrait = canvas.height() > canvas.width();
-    const int title_y = portrait ? 58 + kPortraitContentOffsetY
-                                 : 30 + kLandscapeContentOffsetY;
-    const int sparkle_y = portrait ? 77 + kPortraitContentOffsetY
-                                    : 49 + kLandscapeContentOffsetY;
-    const int divider_y = portrait ? 110 + kPortraitContentOffsetY
-                                    : 82 + kLandscapeContentOffsetY;
+    const int title_y = portrait ? 40 + kPortraitContentOffsetY
+                                 : 18 + kLandscapeContentOffsetY;
+    const int sparkle_y = portrait ? 53 + kPortraitContentOffsetY
+                                    : 31 + kLandscapeContentOffsetY;
+    const int divider_y = portrait ? 90 + kPortraitContentOffsetY
+                                    : 62 + kLandscapeContentOffsetY;
     draw_centered_text(canvas,
                        canvas.width() / 2,
                        title_y,

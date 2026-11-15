@@ -15,6 +15,10 @@ const char *sticky_app_id_name(StickyAppId app)
         return "flashcards";
     case StickyAppId::Todo:
         return "todo";
+    case StickyAppId::Habits:
+        return "habits";
+    case StickyAppId::Draftling:
+        return "draftling";
     }
     return "unknown";
 }

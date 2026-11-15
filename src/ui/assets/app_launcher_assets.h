@@ -11,6 +11,8 @@ enum class AppLauncherAssetId : uint8_t {
     Answers,
     Cards,
     Todo,
+    Habits,
+    Draftling,
 };
 
 struct AppLauncherStickerAsset {
