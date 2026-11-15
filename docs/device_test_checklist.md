@@ -2,7 +2,9 @@
 
 Run `python3 tools/device_smoke_test.py --port <PORT> --erase --seconds 300`
 on the computer the Sticky is plugged into, then go through the list while it
-listens. The script prints `[seen]` for each logged step and a PASS/FAIL
+listens. On Windows use the COM port from `pio device list` (e.g.
+`--port COM5`) and keep the project in a folder without spaces, such as
+`C:\sticky`: ESP-IDF refuses paths with spaces. The script prints `[seen]` for each logged step and a PASS/FAIL
 summary at the end.
 
 ## Launcher

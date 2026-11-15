@@ -4,6 +4,7 @@
 Run on the computer the Sticky is plugged into:
 
   python3 tools/device_smoke_test.py --port /dev/ttyUSB0 --erase   # first install
+  python  tools\\device_smoke_test.py --port COM5 --erase           # Windows
   python3 tools/device_smoke_test.py --port /dev/ttyUSB0           # later updates
   python3 tools/device_smoke_test.py --port /dev/ttyUSB0 --no-flash --seconds 120
 
@@ -16,6 +17,7 @@ Exit code 0 = all required markers seen and no errors.
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import subprocess
 import sys
@@ -55,6 +57,18 @@ def main() -> int:
     parser.add_argument("--no-flash", action="store_true")
     parser.add_argument("--seconds", type=int, default=90)
     args = parser.parse_args()
+
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    if not args.no_flash and re.search(r"\s", root):
+        print(f"ESP-IDF cannot build in a path with spaces:\n  {root}\n"
+              "Move the project, e.g. to C:\\sticky (Windows) or ~/sticky, "
+              "and run again.", file=sys.stderr)
+        return 2
+    if os.name == "nt" and args.port.startswith("/dev/"):
+        print(f"{args.port} is a Linux/macOS port name. On Windows use the "
+              "COM port shown by 'pio device list', e.g. --port COM5.",
+              file=sys.stderr)
+        return 2
 
     if not args.no_flash:
         if args.erase:
