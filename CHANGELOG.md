@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Add the Habits app: one illustrated page per habit with SKIP / DONE, chime and completion jingle, day streak, and a phone editor served over the Sticky's own Wi-Fi hotspot (QR codes for Wi-Fi and page).
+- Add Draftling dual-boot: new partition table with two app slots, a hand-off page that restarts into Draftling, and a Draftling patch (Up + Down for 2 s or F1 > Back to Bunny) plus `tools/build_draftling.sh`.
+- Launcher now shows six cards with 128 px stickers, including new Habits and Draftling bunnies.
+- Erase and re-create NVS when its layout or format is unreadable.
+
 - Add the Cards app: SM-2 spaced-repetition flashcards with a built-in Spanish Top 5000 deck, daily new-card limits, card direction toggle and power-loss-safe progress in the `assets` partition.
 - Add the To-Do app: up to 40 tasks with an on-screen keyboard (including Spanish accents), saved in NVS.
 - Replace the Pomodoro alarm with a repeating melodic jingle and add a focus-start cue.

@@ -17,6 +17,14 @@ idf_component_register(
         "apps/flashcards/flashcards_pages.cpp"
         "apps/flashcards/flashcards_srs.cpp"
         "apps/flashcards/flashcards_storage.cpp"
+        "apps/draftling/draftling_app.cpp"
+        "apps/draftling/draftling_pages.cpp"
+        "apps/habits/habits_app.cpp"
+        "apps/habits/habits_model.cpp"
+        "apps/habits/habits_pages.cpp"
+        "apps/habits/habits_storage.cpp"
+        "apps/habits/habits_web.cpp"
+        "apps/habits/habits_web_page.cpp"
         "apps/todo/todo_app.cpp"
         "apps/todo/todo_list.cpp"
         "apps/todo/todo_pages.cpp"
@@ -64,6 +72,8 @@ idf_component_register(
         "ui/assets/book_of_answers_assets.cpp"
         "ui/assets/app_launcher_assets.cpp"
         "ui/assets/desktop_pet_assets.cpp"
+        "ui/assets/habits_assets.cpp"
+        "../third_party/qrcodegen/qrcodegen.c"
         "ui/assets/pomodoro_assets.cpp"
         "ui/assets/pet_animation_assets.cpp"
         "ui/assets/status_bunny_assets.cpp"
@@ -80,7 +90,9 @@ idf_component_register(
         "apps/book_of_answers"
         "apps/desktop_pet"
         "apps/desktop_pet/core"
+        "apps/draftling"
         "apps/flashcards"
+        "apps/habits"
         "apps/todo"
         "apps/onboarding"
         "apps/pomodoro"
@@ -93,6 +105,7 @@ idf_component_register(
         "sensors"
         "ui"
         "ui/assets"
+        "../third_party/qrcodegen"
     REQUIRES
         esp_driver_gpio
         esp_driver_i2c
@@ -100,6 +113,11 @@ idf_component_register(
         esp_driver_spi
         esp_hw_support
         esp_partition
+        app_update
+        esp_wifi
+        esp_netif
+        esp_event
+        esp_http_server
         button
         gt911
         nvs_flash

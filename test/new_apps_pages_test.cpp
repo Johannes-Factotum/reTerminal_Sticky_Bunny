@@ -9,7 +9,10 @@
 #include <vector>
 
 #include "canvas.h"
+#include "draftling_pages.h"
 #include "flashcards_pages.h"
+#include "habits_model.h"
+#include "habits_pages.h"
 #include "todo_list.h"
 #include "todo_pages.h"
 
@@ -235,5 +238,60 @@ int main()
     editor = {"", true, TodoKeyboardMode::Symbols, true};
     todo_page_render_editor(canvas, editor);
     write_preview(canvas, "todo_editor_symbols.pgm");
+
+    // ---- Habits ----
+    HabitsConfig habits = {};
+    habits_default_config(habits);
+    HabitResult results[kHabitsMax] = {HabitResult::Done,
+                                       HabitResult::Skipped};
+    habits_page_render_start(canvas, {&habits, results, 6});
+    assert_overlay_area_clear(canvas);
+    write_preview(canvas, "habits_start.pgm");
+    assert(habits_page_action_at(HabitsPage::Start, 240, 640) ==
+           HabitsAction::Start);
+    assert(habits_page_action_at(HabitsPage::Start, 240, 730) ==
+           HabitsAction::PhoneSetup);
+    for (size_t i = 0; i < habits.count; ++i) {
+        habits_page_render_step(canvas, {&habits, results, i});
+        assert_overlay_area_clear(canvas);
+        // Bunny art and description are present.
+        assert(black_pixels(canvas, 90, 118, 390, 418) > 2000U);
+        assert(black_pixels(canvas, 36, 432, 444, 602) > 800U);
+        char name[32];
+        std::snprintf(name, sizeof(name), "habits_step%u.pgm",
+                      static_cast<unsigned>(i + 1));
+        write_preview(canvas, name);
+    }
+    assert(habits_page_action_at(HabitsPage::Step, 120, 730) ==
+           HabitsAction::Skip);
+    assert(habits_page_action_at(HabitsPage::Step, 360, 730) ==
+           HabitsAction::Done);
+    assert(habits_page_action_at(HabitsPage::Step, 50, 40) ==
+           HabitsAction::Home);
+    assert(habits_page_action_at(HabitsPage::Step, 240, 300) ==
+           HabitsAction::None);
+    habits_page_render_complete(canvas, {3, 1, 7});
+    write_preview(canvas, "habits_complete.pgm");
+    assert(habits_page_action_at(HabitsPage::Complete, 240, 720) ==
+           HabitsAction::Back);
+    habits_page_render_phone(canvas, {"Sticky-Habits-4F2A", "bunny73140",
+                                      "http://192.168.4.1", true});
+    write_preview(canvas, "habits_phone.pgm");
+    assert(habits_draw_qr(canvas, 0, 0, "http://192.168.4.1", 5) > 100);
+    assert(habits_page_action_at(HabitsPage::Phone, 240, 720) ==
+           HabitsAction::Back);
+
+    // ---- Draftling hand-off ----
+    draftling_page_render(canvas, {true, "1.4.0"});
+    assert_overlay_area_clear(canvas);
+    write_preview(canvas, "draftling_installed.pgm");
+    assert(draftling_page_action_at(true, 240, 640) == DraftlingAction::Open);
+    assert(draftling_page_action_at(true, 240, 730) == DraftlingAction::Back);
+    draftling_page_render(canvas, {false, ""});
+    write_preview(canvas, "draftling_missing.pgm");
+    assert(draftling_page_action_at(false, 240, 640) ==
+           DraftlingAction::Back);
+    assert(draftling_page_action_at(false, 240, 730) ==
+           DraftlingAction::None);
     return 0;
 }

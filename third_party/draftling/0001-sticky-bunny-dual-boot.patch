@@ -1,0 +1,167 @@
+diff --git a/firmware/components/editor/editor_ui.cpp b/firmware/components/editor/editor_ui.cpp
+index 589261c..c3b681c 100644
+--- a/firmware/components/editor/editor_ui.cpp
++++ b/firmware/components/editor/editor_ui.cpp
+@@ -933,6 +933,7 @@ enum menu_item_t {
+     MENU_ITEM_CONN_MENU,
+     MENU_ITEM_SYSTEM_MENU,
+     MENU_ITEM_SLEEP,
++    MENU_ITEM_RETURN,        /* only when a return hook is set */
+     MENU_ITEM_HELP,
+     MENU_ITEM_CLOSE,         /* the top level's counterpart of "Back" */
+     /* Sync */
+@@ -1294,6 +1295,16 @@ static bool      s_exit_open     = false;
+ static int       s_exit_sel      = 0;      /* 0=Save 1=proceed-no-save 2=Cancel */
+ static exit_purpose_t s_exit_purpose = EXIT_PURPOSE_BROWSER;
+ 
++/* "Back to Bunny" (dual-boot) menu entry; see editor_ui_set_return_hook. */
++static void (*s_return_hook)(void) = NULL;
++static const char *s_return_label = "Back to Bunny";
++
++extern "C" void editor_ui_set_return_hook(const char *label, void (*hook)(void))
++{
++    s_return_label = label ? label : "Back to Bunny";
++    s_return_hook = hook;
++}
++
+ #define EXIT_OPT_SAVE   0
+ #define EXIT_OPT_DISCARD 1
+ #define EXIT_OPT_CANCEL 2
+@@ -5082,6 +5093,7 @@ static char menu_item_hotkey(menu_item_t id)
+     case MENU_ITEM_SYNC_MENU:   return 'y';  /* "Sync..." */
+     case MENU_ITEM_CONN_MENU:   return 'c';  /* "Connectivity..." */
+     case MENU_ITEM_SYSTEM_MENU: return 't';  /* "System & Storage..." */
++    case MENU_ITEM_RETURN:      return 'b';  /* "Back to Bunny" */
+     case MENU_ITEM_HELP:        return 'h';  /* "Help (F10)" */
+     case MENU_ITEM_GIT_SYNC:    return 's';  /* "Synchronize: ..." */
+     case MENU_ITEM_DRAFTBOX:    return 'c';  /* "Connect a Draftbox repository..." */
+@@ -5238,6 +5250,9 @@ static void refresh_menu_items(void)
+         menu_add(MENU_ITEM_CONN_MENU, "Connectivity...");
+         menu_add(MENU_ITEM_SYSTEM_MENU, "System & Storage...");
+         menu_add(MENU_ITEM_SLEEP, "Sleep now");
++        if (s_return_hook) {
++            menu_add(MENU_ITEM_RETURN, s_return_label);
++        }
+         menu_add(MENU_ITEM_HELP, "Help (F10)");
+         menu_add(MENU_ITEM_CLOSE, "Close menu (Esc / F1)");
+         break;
+@@ -7624,6 +7639,12 @@ static void menu_activate_item(int row)
+         s_menu_open = false;
+         show_help(s_editor_screen_active ? HELP_FROM_EDITOR : HELP_FROM_BROWSER);
+         break;
++    case MENU_ITEM_RETURN:
++        close_menu();
++        if (s_return_hook) {
++            s_return_hook();
++        }
++        break;
+     case MENU_ITEM_SLEEP:
+         /* Leave the menu first so, if we prompt about unsaved changes,
+          * the dialog is drawn on the editor screen it lives on. With no
+diff --git a/firmware/components/editor/include/editor_ui.h b/firmware/components/editor/include/editor_ui.h
+index 269347b..e376b10 100644
+--- a/firmware/components/editor/include/editor_ui.h
++++ b/firmware/components/editor/include/editor_ui.h
+@@ -17,6 +17,10 @@ void editor_ui_set_status(const char *msg);
+  * task; the request is handled by the UI task. */
+ void editor_ui_request_sleep(void);
+ 
++/* Dual-boot with Sticky Bunny: when a hook is set, the F1 menu shows
++ * "Back to Bunny", which calls it (from the LVGL task). */
++void editor_ui_set_return_hook(const char *label, void (*hook)(void));
++
+ /* Display a persistent (non-auto-clearing) status message. Used for
+  * fatal boot-time errors where the firmware halts and the message
+  * must remain on screen until the user resets the device. */
+diff --git a/firmware/main/CMakeLists.txt b/firmware/main/CMakeLists.txt
+index 21d8f57..ea57161 100644
+--- a/firmware/main/CMakeLists.txt
++++ b/firmware/main/CMakeLists.txt
+@@ -11,7 +11,7 @@
+ ## `driver/i2c_master.h`, and `driver/uart.h` (now in esp_driver_spi /
+ ## esp_driver_gpio / esp_driver_i2c / esp_driver_uart) and
+ ## `driver/rtc_io.h` (still in the legacy `driver` component).
+-set(MAIN_PRIV_REQS display sd_card ble_keyboard editor wifi_manager git_sync standby battery touchscreen power io_expander nvs_flash bt esp_hid driver esp_driver_gpio esp_driver_spi esp_driver_i2c esp_driver_uart esp_driver_rmt esp_event esp_pm)
++set(MAIN_PRIV_REQS display sd_card ble_keyboard editor wifi_manager git_sync standby battery touchscreen power io_expander nvs_flash bt esp_hid driver esp_driver_gpio esp_driver_spi esp_driver_i2c esp_driver_uart esp_driver_rmt esp_event esp_pm app_update esp_partition)
+ if(CONFIG_ESP_HOSTED_HOST)
+     list(APPEND MAIN_PRIV_REQS espressif__esp_hosted)
+ endif()
+diff --git a/firmware/main/main.cpp b/firmware/main/main.cpp
+index 9d52599..ea2496d 100644
+--- a/firmware/main/main.cpp
++++ b/firmware/main/main.cpp
+@@ -5,6 +5,8 @@
+ #include <esp_log.h>
+ #include <esp_system.h>
+ #include <esp_timer.h>
++#include <esp_ota_ops.h>
++#include <esp_partition.h>
+ #include <nvs_flash.h>
+ #include <nvs.h>
+ #include <driver/spi_common.h>
+@@ -1849,6 +1851,36 @@ static void ws_epaper397_nav_init(void)
+  * below unchanged (deep-sleep wake source, short press = sleep, 2 s
+  * hold = forget BLE keyboards). */
+ 
++/* ---- Dual-boot with Sticky Bunny ----
++ * Sticky Bunny lives in ota_0 and this firmware in ota_1 (see Sticky
++ * Bunny's partitions.csv). Returning saves every open document, wipes
++ * the panel, points the boot slot at ota_0 and restarts. */
++static void return_to_bunny(void)
++{
++    const esp_partition_t *bunny = esp_partition_find_first(
++        ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_OTA_0, NULL);
++    if (!bunny || bunny == esp_ota_get_running_partition()) {
++        ESP_LOGW(TAG, "Back to Bunny: no Sticky Bunny image in ota_0");
++        return;
++    }
++    esp_app_desc_t desc;
++    if (esp_ota_get_partition_description(bunny, &desc) != ESP_OK) {
++        ESP_LOGW(TAG, "Back to Bunny: ota_0 holds no valid image");
++        return;
++    }
++    pre_sleep_autosave();
++    esp_err_t err = esp_ota_set_boot_partition(bunny);
++    ESP_LOGI(TAG, "Back to Bunny: %s", esp_err_to_name(err));
++    if (err == ESP_OK) esp_restart();
++}
++
++static void return_to_bunny_task(void *arg)
++{
++    (void)arg;
++    return_to_bunny();
++    vTaskDelete(NULL);
++}
++
+ static void reterminal_sticky_btn_poll_cb(void *arg)
+ {
+     (void)arg;
+@@ -1858,6 +1890,20 @@ static void reterminal_sticky_btn_poll_cb(void *arg)
+         { BTN_DOWN_PIN, KB_KEY_PAGEDOWN },
+     };
+     static btn_state_t st[2];
++    /* Holding Up + Down together for 2 s returns to Sticky Bunny. The
++     * flash work runs in its own task, not in this esp_timer callback. */
++    static int chord_ticks;
++    static bool chord_fired;
++    bool both = gpio_get_level((gpio_num_t)BTN_UP_PIN) == 0 &&
++                gpio_get_level((gpio_num_t)BTN_DOWN_PIN) == 0;
++    if (!both) {
++        chord_ticks = 0;
++        chord_fired = false;
++    } else if (!chord_fired && ++chord_ticks >= BTN_LONG_PRESS_TICKS) {
++        chord_fired = true;
++        xTaskCreate(return_to_bunny_task, "to_bunny", 6144, NULL, 5, NULL);
++    }
++    if (chord_ticks > 0) return;  /* no page turns while chording */
+     btn_keys_poll(kButtons, st, 2, 2);
+ }
+ 
+@@ -1879,6 +1925,7 @@ static void reterminal_sticky_btn_init(void)
+     ESP_ERROR_CHECK(esp_timer_start_periodic(t, (uint64_t)BTN_POLL_PERIOD_MS * 1000));
+     ESP_LOGI(TAG, "Seeed reTerminal Sticky Up/Down button poller started "
+                   "(GPIO%d/GPIO%d)", BTN_UP_PIN, BTN_DOWN_PIN);
++    editor_ui_set_return_hook("Back to Bunny (Up+Down 2 s)", return_to_bunny);
+ }
+ #endif /* CONFIG_DRAFTLING_MODEL_SEEED_RETERMINAL_STICKY */
+ 

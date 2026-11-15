@@ -9,8 +9,10 @@
 #include "book_of_answers_app.h"
 #include "canvas.h"
 #include "desktop_pet_app.h"
+#include "draftling_app.h"
 #include "esp_timer.h"
 #include "flashcards_app.h"
+#include "habits_app.h"
 #include "esp_attr.h"
 #include "esp_sleep.h"
 #include "esp_system.h"
@@ -65,6 +67,8 @@ bool s_pomodoro_started = false;
 bool s_book_started = false;
 bool s_flashcards_started = false;
 bool s_todo_started = false;
+bool s_habits_started = false;
+bool s_draftling_started = false;
 bool s_background_timer_wake = false;
 int64_t s_background_sleep_deadline_us = 0;
 uint32_t s_last_user_activity_ms = 0U;
@@ -101,8 +105,9 @@ bool app_started(StickyAppId app)
     case StickyAppId::Todo:
         return s_todo_started;
     case StickyAppId::Habits:
+        return s_habits_started;
     case StickyAppId::Draftling:
-        return false;  // not implemented yet
+        return s_draftling_started;
     }
     return false;
 }
@@ -129,7 +134,10 @@ void mark_app_started(StickyAppId app)
         s_todo_started = true;
         break;
     case StickyAppId::Habits:
+        s_habits_started = true;
+        break;
     case StickyAppId::Draftling:
+        s_draftling_started = true;
         break;
     }
 }
@@ -150,8 +158,9 @@ esp_err_t pause_app(StickyAppId app)
     case StickyAppId::Todo:
         return todo_app_pause();
     case StickyAppId::Habits:
+        return habits_app_pause();
     case StickyAppId::Draftling:
-        return ESP_ERR_NOT_SUPPORTED;  // not implemented yet
+        return draftling_app_pause();
     }
     return ESP_ERR_INVALID_ARG;
 }
@@ -172,8 +181,9 @@ esp_err_t start_app(StickyAppId app)
     case StickyAppId::Todo:
         return todo_app_start(*s_canvas);
     case StickyAppId::Habits:
+        return habits_app_start(*s_canvas);
     case StickyAppId::Draftling:
-        return ESP_ERR_NOT_SUPPORTED;  // not implemented yet
+        return draftling_app_start(*s_canvas);
     }
     return ESP_ERR_INVALID_ARG;
 }
@@ -194,8 +204,9 @@ esp_err_t resume_app(StickyAppId app)
     case StickyAppId::Todo:
         return todo_app_resume();
     case StickyAppId::Habits:
+        return habits_app_resume();
     case StickyAppId::Draftling:
-        return ESP_ERR_NOT_SUPPORTED;  // not implemented yet
+        return draftling_app_resume();
     }
     return ESP_ERR_INVALID_ARG;
 }
@@ -237,6 +248,9 @@ bool power_sleep_allowed()
     if (s_current_app == StickyAppId::Todo) {
         return todo_app_power_sleep_allowed();
     }
+    if (s_current_app == StickyAppId::Habits) {
+        return habits_app_power_sleep_allowed();
+    }
     return true;
 }
 
@@ -259,6 +273,12 @@ uint32_t power_sleep_timeout_ms()
     }
     if (s_current_app == StickyAppId::Todo) {
         return todo_app_power_sleep_timeout_ms();
+    }
+    if (s_current_app == StickyAppId::Habits) {
+        return habits_app_power_sleep_timeout_ms();
+    }
+    if (s_current_app == StickyAppId::Draftling) {
+        return draftling_app_power_sleep_timeout_ms();
     }
     return 0U;
 }
@@ -286,6 +306,12 @@ esp_err_t prepare_app_power_sleep(uint32_t &current_epoch,
     }
     if (s_current_app == StickyAppId::Todo) {
         return todo_app_prepare_power_sleep();
+    }
+    if (s_current_app == StickyAppId::Habits) {
+        return habits_app_prepare_power_sleep();
+    }
+    if (s_current_app == StickyAppId::Draftling) {
+        return draftling_app_prepare_power_sleep();
     }
     return ESP_ERR_INVALID_ARG;
 }
@@ -920,6 +946,12 @@ void app_task(void *)
             s_current_app == StickyAppId::DesktopPet &&
             desktop_pet_app_take_onboarding_request()) {
             open_tutorial_from_desktop_pet();
+        }
+
+        if (!router.launcher_open &&
+            s_current_app == StickyAppId::Draftling &&
+            draftling_app_take_exit_request()) {
+            return_to_desktop_pet(router);
         }
 
         if (router.launcher_open) {

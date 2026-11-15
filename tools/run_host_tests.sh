@@ -230,9 +230,22 @@ compile_and_run todo_list_test \
     test/todo_list_test.cpp \
     src/apps/todo/todo_list.cpp
 
+compile_and_run habits_model_test \
+    -Isrc/apps/habits \
+    test/habits_model_test.cpp \
+    src/apps/habits/habits_model.cpp
+
+gcc -std=c99 -Wall -Wextra -Werror -c third_party/qrcodegen/qrcodegen.c \
+    -o "${BUILD_DIR}/qrcodegen.o"
+
 compile_and_run new_apps_pages_test \
-    -Isrc/apps/flashcards -Isrc/apps/todo -Isrc/ui \
+    -Isrc/apps/flashcards -Isrc/apps/todo -Isrc/apps/habits \
+    -Isrc/apps/draftling -Isrc/ui -Isrc/ui/assets -Ithird_party/qrcodegen \
     test/new_apps_pages_test.cpp \
+    src/apps/habits/habits_pages.cpp src/apps/habits/habits_model.cpp \
+    src/apps/draftling/draftling_pages.cpp \
+    src/ui/assets/habits_assets.cpp src/ui/assets/app_launcher_assets.cpp \
+    src/ui/assets/pixel_asset.cpp "${BUILD_DIR}/qrcodegen.o" \
     src/apps/flashcards/flashcards_pages.cpp \
     src/apps/todo/todo_pages.cpp \
     src/apps/todo/todo_list.cpp \
@@ -262,7 +275,7 @@ compile_and_run sticky_display_spi_config_test \
     -Itest/epaper_stubs -Isrc/board \
     test/sticky_display_spi_config_test.cpp
 
-echo "[host-test] PASS ${passed_count}/36"
+echo "[host-test] PASS ${passed_count}/37"
 
 # Compile the real panel drivers with simulated GPIO/SPI and controller responses.
 # 使用模拟 GPIO/SPI 编译并验证真实屏幕驱动。

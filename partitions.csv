@@ -1,6 +1,11 @@
-# Name,   Type, SubType, Offset,   Size,      Flags
-nvs,      data, nvs,     0x9000,   0x6000,
-phy_init, data, phy,     0xF000,   0x1000,
-factory,  app,  factory, 0x10000,  0x800000,
-assets,   data, spiffs,  0x810000, 0x17F0000,
-
+# Name,   Type, SubType,  Offset,    Size,      Flags
+# Dual-boot layout shared with Draftling (its Sticky table plus "assets"):
+#   ota_0  = Sticky Bunny firmware (PlatformIO uploads here)
+#   ota_1  = Draftling writerdeck firmware (tools/build_draftling.sh)
+#   assets = Cards progress (raw, two CRC slots per deck)
+nvs,      data, nvs,      0x9000,    0x4000,
+otadata,  data, ota,      0xd000,    0x2000,
+phy_init, data, phy,      0xf000,    0x1000,
+ota_0,    app,  ota_0,    0x10000,   0x7F0000,
+ota_1,    app,  ota_1,    0x800000,  0x7F0000,
+assets,   data, spiffs,   0x1000000, 0x1000000,

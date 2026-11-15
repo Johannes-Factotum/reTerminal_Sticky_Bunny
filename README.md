@@ -66,9 +66,15 @@ See [the compatibility test plan](docs/screen_compatibility.md) for hardware che
 | <img src="docs/images/status-board/menu.png" alt="Sticky Status Board menu" width="390"> | <img src="docs/images/book-of-answers/home.png" alt="Book of Answers home screen" width="245"> |
 | Display `BUSY`, `MEETING`, `ON CALL`, `OPEN TO TALK`, `REST`, or a custom on-device message in landscape. | Hold a question in mind and shake for three seconds to reveal a message, `YES`, `NO`, or `UNCLEAR`. |
 
-## Cards, To-Do and the Pomodoro jingle
+## Cards, To-Do, Habits, Draftling and the Pomodoro jingle
 
-The launcher's four cards are now **Pet**, **Pomodoro**, **Cards** and **To-Do**. Status Board and Book of Answers are still one gesture away: rotate the device to landscape (Status Board) or shake it (Book of Answers) while the launcher is open.
+The launcher shows six cards: **Pet**, **Pomodoro**, **Cards**, **To-Do**, **Habits** and **Draftling** (2 x 3 in portrait, 3 x 2 in landscape). Status Board and Book of Answers are still one gesture away: rotate the device to landscape (Status Board) or shake it (Book of Answers) while the launcher is open.
+
+<p align="center">
+  <img src="docs/images/launcher/launcher-portrait.png" alt="Six-card launcher in portrait" width="200">
+  &nbsp;&nbsp;
+  <img src="docs/images/launcher/launcher-landscape.png" alt="Six-card launcher in landscape" width="333">
+</p>
 
 | Cards: question | Cards: answer | To-Do list | To-Do editor |
 | --- | --- | --- | --- |
@@ -89,6 +95,45 @@ The launcher's four cards are now **Pet**, **Pomodoro**, **Cards** and **To-Do**
 - Up to 40 tasks of 63 bytes each, saved in NVS.
 - Tap a task to tick it off (with a short chime), tap `...` to edit or delete it, `CLEAR DONE` removes finished tasks, `+ ADD` opens the editor.
 - On-screen keyboard with one-shot `SHIFT`, a `123` page with digits, punctuation and Spanish accents (`á é í ó ú ñ ü ¿ ¡`).
+
+### Habits (morning routine)
+
+| Start | Habit page | Routine done | Edit on phone |
+| --- | --- | --- | --- |
+| <img src="docs/images/habits/start.png" alt="Habits start page" width="180"> | <img src="docs/images/habits/step-sun-salutations.png" alt="Sun salutation habit page" width="180"> | <img src="docs/images/habits/complete.png" alt="Routine complete page" width="180"> | <img src="docs/images/habits/phone-setup.png" alt="Phone setup page with QR codes" width="180"> |
+
+- One page per habit, laid out like the tutorial: number badge, progress dots, a bunny for the habit, the description, `3 / 4`, and `SKIP` / `DONE` at the bottom. `DONE` plays a chime and shows the next page; the last page plays the completion jingle.
+- Ships with four example habits and bunnies: *Do 3 sun salutations*, *Lift weights / do pull-ups*, *Eat breakfast*, *Write morning pages*.
+- The start page shows today's results and a day streak. A day counts when you reach the end of the routine (skips allowed); results reset at midnight (RTC).
+- **Edit on phone:** the Sticky opens its own Wi-Fi hotspot and shows two QR codes, one to join the network (random password each time) and one for `http://192.168.4.1`. The page lets you rename the routine, edit, reorder, add (up to 12) or delete habits and pick a bunny for each; `Save to Sticky` updates the device immediately. Wi-Fi is off again as soon as you leave the page.
+
+<img src="docs/images/habits/phone-editor.png" alt="Phone editor page" width="260">
+
+### Draftling (writerdeck)
+
+[Draftling](https://github.com/clackups/draftling) (MIT) is a separate firmware for distraction-free Markdown writing with a Bluetooth keyboard. It lives in the second app slot (`ota_1`); the **Draftling** card shows a hand-off page and restarts the Sticky into it. To come back, hold **Up + Down for 2 s** or choose **F1 > Back to Bunny**; this comes from the small patch in `third_party/draftling/`.
+
+<img src="docs/images/draftling/handoff.png" alt="Draftling hand-off page" width="180">
+
+### Installing (one-time full flash)
+
+This version changes the partition table (two app slots), so the first install must erase the flash. That also clears the saved pet, to-dos, habits and card progress once.
+
+```bash
+pio run -e sticky-release -t erase
+```
+
+```bash
+pio run -e sticky-release -t upload
+```
+
+Optional, for Draftling (needs ESP-IDF v6.1 or newer in the shell; pass your serial port):
+
+```bash
+tools/build_draftling.sh /dev/ttyUSB0
+```
+
+Later Bunny updates only need `pio run -e sticky-release -t upload`; Draftling stays installed.
 
 ### Pomodoro jingle
 

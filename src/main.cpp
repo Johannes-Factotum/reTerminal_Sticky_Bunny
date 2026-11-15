@@ -258,7 +258,14 @@ extern "C" void app_main()
         halt_after_error("sticky_imu_init", imu_result);
     }
 
-    const esp_err_t nvs_result = nvs_flash_init();
+    esp_err_t nvs_result = nvs_flash_init();
+    if (nvs_result == ESP_ERR_NVS_NO_FREE_PAGES ||
+        nvs_result == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+        // A changed partition layout (or a newer NVS format written by the
+        // Draftling firmware) leaves an unreadable NVS: start fresh.
+        nvs_flash_erase();
+        nvs_result = nvs_flash_init();
+    }
     if (nvs_result != ESP_OK) {
         halt_after_error("nvs_flash_init", nvs_result);
     }

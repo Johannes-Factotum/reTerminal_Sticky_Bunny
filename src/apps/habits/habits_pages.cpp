@@ -141,25 +141,27 @@ void habits_page_render_start(Canvas &canvas, const HabitsStartView &view)
 {
     const HabitsConfig &config = *view.config;
     canvas.clear(GrayLevel::White);
-    const UiRect title = {24, 22, 330, 56};
+    const UiRect title = {24, 40, 330, 56};
     ui_draw_fitted_text(canvas, title, config.name, 4, 2);
     char streak[24];
     std::snprintf(streak, sizeof(streak), "%u", view.streak_days);
-    draw_badge(canvas, 404, 50, streak);
-    utf8_draw_text(canvas, 362, 84, "DAY STREAK", 1);
+    // Kept below the battery indicator in the top-right corner.
+    draw_badge(canvas, 412, 68, streak);
+    ui_draw_centered_text(canvas, 412, 102, "DAY STREAK", 1);
 
-    draw_frame(canvas, kFrameTop, 580, false);
+    constexpr int kListTop = 116;
+    draw_frame(canvas, kListTop, 580, false);
     size_t done = 0U;
     for (size_t i = 0U; i < config.count; ++i) {
-        const int y = kFrameTop + 22 + static_cast<int>(i) * 56;
-        if (y > 540) {
-            break;
-        }
+        // Up to 12 habits share the list: rows shrink from 56 to 37 px.
+        const int pitch =
+            config.count <= 8U ? 56 : (580 - kListTop - 24) / config.count;
+        const int y = kListTop + 18 + static_cast<int>(i) * pitch;
         const HabitResult result = view.results[i];
         char number[4];
         std::snprintf(number, sizeof(number), "%u",
                       static_cast<unsigned>(i + 1U));
-        canvas.fill_circle(52, y + 18, 18, GrayLevel::Black);
+        canvas.fill_circle(52, y + 18, 16, GrayLevel::Black);
         ui_draw_centered_text(canvas, 52, y + 11, number, 2,
                               GrayLevel::White);
         const UiRect text = {84, y, 300, 40};
@@ -170,8 +172,10 @@ void habits_page_render_start(Canvas &canvas, const HabitsStartView &view)
         } else if (result == HabitResult::Skipped) {
             draw_cross(canvas, 414, y + 20, 22, GrayLevel::Black);
         }
-        for (int x = 40; x < 440; x += 6) {
-            canvas.draw_pixel(x, y + 46, GrayLevel::Black);
+        if (pitch >= 50) {
+            for (int x = 40; x < 440; x += 6) {
+                canvas.draw_pixel(x, y + 46, GrayLevel::Black);
+            }
         }
     }
     (void)done;
